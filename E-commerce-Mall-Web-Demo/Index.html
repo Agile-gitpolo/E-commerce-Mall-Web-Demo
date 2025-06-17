@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>京东商城</title>
+    <style>
+        /*
+         * 全局样式
+         * -----------------------------------------------------------------------------
+         * 作用: 统一设置页面的基本字体、盒模型以及去除默认的内外边距。
+         * 实现逻辑:
+         * - `*`: 匹配所有元素，应用以下样式。
+         * - `margin: 0; padding: 0;`: 移除所有元素的默认外边距和内边距，确保布局的精确控制。
+         * - `box-sizing: border-box;`: 设置盒模型为 `border-box`，使得元素的 `width` 和 `height` 包含 `padding` 和 `border`，简化布局计算。
+         * - `font-family`: 定义页面的默认字体栈，优先使用系统字体，提供一致的视觉体验。
+         */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        /*
+         * Body 样式
+         * -----------------------------------------------------------------------------
+         * 作用: 设置页面的最小高度，保证页面内容不足时也能撑满视口；添加背景颜色过渡效果。
+         * 实现逻辑:
+         * - `min-height: 100vh;`: 确保 `body` 至少占据整个视口高度 (`vh` 是视口高度的百分比单位)。
+         * - `transition: background-color 0.3s ease;`: 当 `body` 的 `background-color` 属性改变时，平滑过渡 0.3 秒，用于主题切换时的动画效果。
+         * - `font-size: 14px;`: 设置页面的基本字体大小。
+         */
+        body {
+            min-height: 100vh;
+            transition: background-color 0.3s ease;
+            font-size: 14px;
+        }
+
+        /*
+         * 主题皮肤样式
+         * -----------------------------------------------------------------------------
+         * 作用: 定义了五种不同的主题颜色方案，通过给 `body` 元素添加对应的类名来切换。
+         * 实现逻辑:
+         * - 每个主题类 (`.theme-cyberpunk`, `.theme-cod` 等) 都定义了 `background-color` (背景色) 和 `color` (文本颜色)。
+         * - 通过 JavaScript 动态添加/移除这些类，实现页面的整体主题切换。
+         */
+        .theme-cyberpunk {
+            background-color: #0d0d2b;
+            color: #e0e0e0;
+        }
+
+        .theme-cod {
+            background-color: #333;
+            color: #ddd;
+        }
+
+        .theme-horizon {
+            background-color: #005a9e;
+            color: #fff;
+        }
+
+        .theme-gta {
+            background-color: #fca311;
+            color: #14213d;
+        }
+
+        .theme-genshin {
+            background-color: #eef5ff;
+            color: #4a5568;
+        }
+
+        /*
+         * 通用容器样式
+         * -----------------------------------------------------------------------------
+         * 作用: 用于限制页面内容的宽度并居中，提供更好的可读性和视觉组织。
+         * 实现逻辑:
+         * - `max-width: 1200px;`: 将内容的最大宽度限制为 1200px，防止在大屏幕上内容过宽。
+         * - `margin: 2rem auto;`: 上下外边距为 2rem，左右外边距自动 (`auto`)，实现水平居中。
+         * - `padding: 0 20px;`: 左右内边距为 20px，防止内容紧贴浏览器边缘。
+         */
+        .page-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 20px;
+        }
+
+        /*
+         * 导航栏样式
+         * -----------------------------------------------------------------------------
+         * 作用: 页面顶部的固定导航栏，包含 Logo、链接、登录/注册和购物车。
+         * 实现逻辑:
+         * - `background-color: white;`: 设置导航栏背景色为白色。
+         * - `box-shadow`: 添加阴影效果，使其在页面滚动时有浮动感。
+         * - `position: sticky; top: 0; z-index: 999;`: 使导航栏在滚动时固定在顶部，`z-index` 确保它在其他内容之上。
+         */
+        .navbar {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-content {
+            display: flex;
+            /* 使用 Flexbox 进行布局 */
+            justify-content: space-between;
+            /* 子元素两端对齐 (Logo 和导航链接) */
+            align-items: center;
+            /* 垂直居中 */
+            height: 64px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-container .logo-img {
+            height: 40px;
+        }
+
+        .logo-container .logo-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ff0000;
+            /* 京东品牌红色 */
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            /* 导航链接之间的间距 */
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #4a5568;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: color 0.2s;
+            /* 鼠标悬停时的颜色过渡效果 */
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #ff0000;
+        }
+
+        /*
+         * 购物车图标和数量显示
+         * -----------------------------------------------------------------------------
+         * 作用: 显示购物车图标和商品数量的气泡。
+         * 实现逻辑:
+         * - `.cart-container`: 设置 `position: relative;` 为子元素 `.cart-count` 的绝对定位提供参考。
+         * - `.cart-count`: 绝对定位在购物车图标的右上角，圆形背景，显示商品数量。
+         * - `display: inline-block;`: 允许设置宽度和高度。
+         * - `min-width`, `height`, `border-radius: 50%;`: 确保圆形显示。
+         */
+        .cart-container {
+            position: relative;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            display: inline-block;
+            min-width: 20px;
+            height: 20px;
+            background-color: #ff0000;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 12px;
+            padding: 0 5px;
+        }
+
+        /*
+         * 购物车侧边面板
+         * -----------------------------------------------------------------------------
+         * 作用: 从右侧滑入的购物车详情面板，显示已添加的商品列表和总价。
+         * 实现逻辑:
+         * - `position: fixed;`: 使面板固定在视口中，不随页面滚动。
+         * - `right: -350px;`: 初始时将面板隐藏在右侧视口之外。
+         * - `width: 350px; height: 100%;`: 定义面板的尺寸。
+         * - `box-shadow`: 添加阴影效果。
+         * - `transition: right 0.3s ease;`: 当 `right` 属性改变时，平滑过渡 0.3 秒，实现滑入滑出动画。
+         * - `.cart-panel.active`: 当添加 `active` 类时，`right: 0;` 使面板完全显示。
+         * - `display: flex; flex-direction: column;`: Flexbox 布局，使头部、内容、底部垂直堆叠。
+         * - `.cart-panel-content`: `flex-grow: 1; overflow-y: auto;` 确保内容区域占据剩余空间并可滚动。
+         */
+        .cart-panel {
+            position: fixed;
+            right: -350px;
+            /* 初始时隐藏在右侧 */
+            top: 0;
+            width: 350px;
+            height: 100%;
+            background: white;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            /* 滑入滑出动画 */
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            color: #333;
+        }
+
+        .cart-panel.active {
+            right: 0;
+            /* 显示购物车面板 */
+        }
+
+        .cart-panel-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-panel-close {
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: #64748b;
+        }
+
+        .cart-panel-content {
+            padding: 1rem;
+            flex-grow: 1;
+            /* 占据剩余空间 */
+            overflow-y: auto;
+            /* 内容超出时可滚动 */
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .cart-item-remove {
+            cursor: pointer;
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .cart-footer {
+            padding: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .cart-total {
+            text-align: right;
+            margin-bottom: 1rem;
+        }
+
+        .cart-clear {
+            width: 100%;
+            padding: 0.75rem;
+            background: #dc3545;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            border-radius: 4px;
+        }
+
+        /*
+         * 登录/注册弹窗
+         * -----------------------------------------------------------------------------
+         * 作用: 显示登录和注册表单的模态弹窗。
+         * 实现逻辑:
+         * - `display: none;`: 初始时隐藏弹窗。
+         * - `position: fixed; top: 0; left: 0; width: 100%; height: 100%;`: 使弹窗覆盖整个视口。
+         * - `background-color: rgba(0, 0, 0, 0.5);`: 半透明黑色背景，实现遮罩效果。
+         * - `backdrop-filter: blur(5px);`: 对背景内容应用模糊效果，提升视觉效果。
+         * - `align-items: center; justify-content: center;`: 使用 Flexbox 将弹窗内容 (`.auth-container`) 垂直和水平居中。
+         * - `.auth-modal.active`: 当添加 `active` 类时，`display: flex;` 使弹窗显示。
+         * - 标签页切换 (`.auth-tab`): 通过 `border-bottom` 和 `color` 的变化来指示当前激活的标签页。
+         * - 表单切换 (`.auth-form`): 初始 `display: none;`，激活的表单通过 `.active` 类设置为 `display: block;`。
+         */
+        .auth-modal {
+            display: none;
+            /* 初始时隐藏 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            /* 半透明黑色背景 */
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            /* 背景模糊效果 */
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-modal.active {
+            display: flex;
+            /* 显示弹窗 */
+        }
+
+        .auth-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            color: #333;
+        }
+
+        .auth-tabs {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-tab {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 2px solid transparent;
+        }
+
+        .auth-tab.active {
+            color: #0077b6;
+            border-bottom-color: #0077b6;
+        }
+
+        .auth-form {
+            display: none;
+            /* 初始时隐藏表单 */
+        }
+
+        .auth-form.active {
+            display: block;
+            /* 显示当前激活的表单 */
+        }
+
+        .auth-form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+        }
+
+        .auth-form button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #0077b6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /*
+         * 轮播图
+         * -----------------------------------------------------------------------------
+         * 作用: 显示多张图片轮流播放的广告或特色内容区域。
+         * 实现逻辑:
+         * - `position: relative; overflow: hidden;`: 为内部绝对定位的幻灯片提供定位上下文，并隐藏溢出内容。
+         * - `.carousel-slide`: `position: absolute; opacity: 0;`: 所有幻灯片都绝对定位并默认隐藏。
+         * - `transition: opacity 0.5s ease-in-out;`: 实现平滑的淡入淡出效果。
+         * - `.carousel-slide.active`: 当添加 `active` 类时，`opacity: 1;` 使当前幻灯片显示。
+         * - JavaScript 定时器负责切换 `active` 类。
+         */
+        .carousel {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            /* 用于子元素绝对定位 */
+            overflow: hidden;
+            /* 隐藏超出容器的图片 */
+            margin-bottom: 30px;
+        }
+
+        .carousel-slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            opacity: 0;
+            /* 初始时透明 */
+            transition: opacity 0.5s ease-in-out;
+            /* 淡入淡出效果 */
+        }
+
+        .carousel-slide.active {
+            opacity: 1;
+            /* 显示当前激活的幻灯片 */
+        }
+
+        .carousel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* 图片填充容器并保持比例 */
+        }
+
+        .carousel-slide-content {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .carousel-slide-content h2 {
+            font-size: 2.5rem;
+        }
+
+        .carousel-slide-content.white-text h2 {
+            color: white;
+        }
+
+        .carousel-slide-content.blue-text h2 {
+            color: #0077b6;
+        }
+
+        /*
+         * 区域标题样式
+         * -----------------------------------------------------------------------------
+         * 作用: 为页面各个内容区域提供统一的标题样式。
+         * 实现逻辑:
+         * - 设置字体大小、粗细和底部外边距。
+         * - `color: inherit;`: 确保标题颜色能继承父元素的主题颜色。
+         */
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: inherit;
+            /* 继承父元素的颜色 */
+        }
+
+        /*
+         * 秒杀区域样式
+         * -----------------------------------------------------------------------------
+         * 作用: 显示限时抢购商品列表和倒计时。
+         * 实现逻辑:
+         * - `display: grid;`: 使用 CSS Grid 布局来排列秒杀商品。
+         * - `grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));`: 创建响应式列，每列最小 200px，自动适应可用空间。
+         * - `gap: 1.5rem;`: 定义网格单元之间的间距。
+         * - 倒计时 (`.countdown-timer`): 使用 JavaScript 更新其文本内容，显示剩余时间。
+         */
+        .flash-sale {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            color: #333;
+        }
+
+        .flash-sale-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .flash-sale-timer {
+            font-weight: bold;
+            color: #ff0000;
+        }
+
+        .flash-sale-grid {
+            display: grid;
+            /* 使用Grid布局 */
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            /* 响应式列布局 */
+            gap: 1.5rem;
+            /* 网格间距 */
+        }
+
+        .flash-product {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .flash-product img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .flash-product-price {
+            margin: 0.5rem 0;
+        }
+
+        .countdown-timer {
+            background: #ff0000;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+
+        /*
+         * 商品卡片样式
+         * -----------------------------------------------------------------------------
+         * 作用: 显示普通商品信息，包括图片、标题、描述、价格和加入购物车按钮，并包含图片放大镜功能。
+         * 实现逻辑:
+         * - `display: grid;`: 使用 CSS Grid 布局排列商品卡片，与秒杀区域类似，实现响应式。
+         * - `.product-card`: Flexbox 布局，使内容垂直堆叠，`flex-grow: 1;` 确保信息区域占据剩余空间。
+         * - 图片放大镜 (`.product-image-container`, `.zoom-magnifier`):
+         * - `.product-image-container`: 设置 `position: relative; overflow: hidden;`，并监听鼠标事件。
+         * - `.zoom-magnifier`: 绝对定位的圆形元素，`pointer-events: none;` 使其不阻挡鼠标事件。
+         * - 通过 JavaScript 动态设置 `background-image`, `background-size`, `background-position` 来实现放大效果。
+         */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            color: #333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-image-container {
+            position: relative;
+            /* 用于放大镜的绝对定位 */
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            cursor: crosshair;
+            /* 鼠标样式为十字线 */
+        }
+
+        .product-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .zoom-magnifier {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            /* 圆形放大镜 */
+            pointer-events: none;
+            /* 使放大镜不阻挡鼠标事件 */
+            opacity: 0;
+            /* 初始时隐藏 */
+            transition: opacity 0.3s ease;
+            border: 2px solid #0077b6;
+        }
+
+        .product-info {
+            padding: 1rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-title {
+            font-size: 1rem;
+        }
+
+        .product-description {
+            font-size: 0.875rem;
+            color: #666;
+            margin: 0.5rem 0;
+            flex-grow: 1;
+        }
+
+        .product-price {
+            color: #ff0000;
+            font-weight: bold;
+            font-size: 1.25rem;
+            margin-top: auto;
+            /* 将价格推到底部 */
+        }
+
+        .add-to-cart {
+            background: #ff0000;
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        /*
+         * 主题选择器
+         * -----------------------------------------------------------------------------
+         * 作用: 提供浮动在页面右下角的主题切换按钮组。
+         * 实现逻辑:
+         * - `position: fixed; bottom: 20px; right: 20px;`: 固定在页面的右下角。
+         * - `display: flex; flex-direction: column; gap: 10px;`: 垂直排列主题预览按钮。
+         * - `background: rgba(255, 255, 255, 0.8);`: 半透明背景。
+         * - `.theme-preview`: 圆形预览按钮，包含缩略图，并带有悬停放大和选中边框效果。
+         */
+        .theme-selector {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 10px;
+            z-index: 998;
+        }
+
+        .theme-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+
+        .theme-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .theme-preview:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-preview.active {
+            border-color: #00ffff;
+            /* 选中主题的边框颜色 */
+        }
+
+        /*
+         * 在线客服聊天功能样式
+         * -----------------------------------------------------------------------------
+         * 作用: 提供浮动的聊天按钮和可打开/关闭的聊天窗口。
+         * 实现逻辑:
+         * - `.chat-fab`: 浮动的圆形聊天按钮，固定在左下角，点击后切换聊天窗口的显示状态。
+         * - `.chat-window`: 聊天窗口，初始时隐藏 (`transform: scale(0);`)。
+         * - `transform-origin: bottom left;`: 设置缩放原点为左下角，使其从按钮位置展开。
+         * - `transition: transform 0.3s ease;`: 实现平滑的展开/收缩动画。
+         * - `.chat-window.open`: 当添加 `open` 类时，`transform: scale(1);` 使窗口显示。
+         * - 聊天消息 (`.chat-messages`): `flex-grow: 1; overflow-y: auto;` 确保消息区域占据剩余空间并可滚动。
+         * - 消息气泡 (`.message`): 根据 `user` 或 `agent` 类应用不同的背景色、文本颜色和对齐方式，并调整圆角使其更像对话气泡。
+         */
+        .chat-fab {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            background-color: #0077b6;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            transition: transform 0.2s ease;
+        }
+
+        .chat-fab:hover {
+            transform: scale(1.1);
+        }
+
+        .chat-window {
+            position: fixed;
+            bottom: 100px;
+            left: 20px;
+            width: 350px;
+            height: 450px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1000;
+            transform: scale(0);
+            /* 初始时隐藏并缩小 */
+            transform-origin: bottom left;
+            /* 缩放的原点 */
+            transition: transform 0.3s ease;
+            /* 缩放动画 */
+        }
+
+        .chat-window.open {
+            transform: scale(1);
+            /* 显示并放大 */
+        }
+
+        .chat-header {
+            background: #0077b6;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            /* 消息过多时滚动 */
+            color: #333;
+            background-color: #f4f7f9;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            max-width: 80%;
+            padding: 0.5rem 1rem;
+            border-radius: 18px;
+        }
+
+        .message.user {
+            background: #0077b6;
+            color: white;
+            margin-left: auto;
+            /* 用户消息靠右 */
+            border-bottom-right-radius: 4px;
+            /* 调整圆角，使其一角是直角 */
+        }
+
+        .message.agent {
+            background: #e9ecef;
+            color: #333;
+            margin-right: auto;
+            /* 客服消息靠左 */
+            border-bottom-left-radius: 4px;
+            /* 调整圆角，使其一角是直角 */
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        #chat-input {
+            flex-grow: 1;
+            border: 1px solid #ccc;
+            border-radius: 18px;
+            padding: 0.5rem 1rem;
+            margin-right: 0.5rem;
+        }
+
+        #chat-send-btn {
+            background: #0077b6;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body class="theme-cyberpunk">
+    <!-- 导航栏模块 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-content">
+                <div class="logo-container">
+                    <img src="https://img10.360buyimg.com/img/jfs/t1/253743/19/1794/9143/67654f2cFa801c174/779336fde4b11164.png"
+                        alt="[京东Logo]" class="logo-img">
+                    <span class="logo-text">京东商城</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#">主页</a>
+                    <a href="#">产品</a>
+                    <a href="#" id="login-link">登录/注册</a>
+                    <div class="cart-container">
+                        <a href="#" id="cart-toggle">购物车</a>
+                        <span id="cart-count" class="cart-count" style="display: none;">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 购物车面板模块 -->
+    <div class="cart-panel" id="cart-panel">
+        <div class="cart-panel-header">
+            <h3>我的购物车</h3><span class="cart-panel-close">×</span>
+        </div>
+        <div class="cart-panel-content" id="cart-items"></div>
+        <div class="cart-footer">
+            <div class="cart-total"><span>总计：</span><strong id="cart-total-price">¥0.00</strong></div>
+            <button class="cart-clear" id="cart-clear">清空购物车</button>
+        </div>
+    </div>
+
+    <!-- 登录/注册弹窗模块 -->
+    <div class="auth-modal" id="auth-modal">
+        <div class="auth-container">
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-tab="login">登录</div>
+                <div class="auth-tab" data-tab="register">注册</div>
+            </div>
+            <form class="auth-form active" id="login-form">
+                <div class="auth-form-group"><label for="login-email">邮箱</label><input type="email" id="login-email"
+                        required></div>
+                <div class="auth-form-group"><label for="login-password">密码</label><input type="password"
+                        id="login-password" required></div>
+                <button type="submit">登录</button>
+            </form>
+            <form class="auth-form" id="register-form">
+                <div class="auth-form-group"><label for="register-email">邮箱</label><input type="email"
+                        id="register-email" required></div>
+                <div class="auth-form-group"><label for="register-password">密码</label><input type="password"
+                        id="register-password" required></div>
+                <button type="submit">注册</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 轮播图模块 -->
+    <div class="carousel">
+        <div class="carousel-slide active">
+            <img src="https://www.uniqlo.cn/cms/1b04c3f08f09ba60d31237e05d3da885.jpg" alt="[优衣库春季新品横幅图片]">
+            <div class="carousel-slide-content white-text">
+                <h2>春季新品上市</h2>
+            </div>
+        </div>
+        <div class="carousel-slide">
+            <img src="https://img.freepik.com/free-photo/laptop-white-background-top-view-copy-space_169016-52823.jpg?semt=ais_hybrid&w=740"
+                alt="[俯瞰白色背景上的笔记本电脑]">
+            <div class="carousel-slide-content blue-text">
+                <h2>数码产品专场</h2>
+            </div>
+        </div>
+        <div class="carousel-slide">
+            <img src="https://cn.bing.com/th?id=OHR.CalaLuna_ZH-CN8174946414_UHD.jpg" alt="[沙滩旅游图片]">
+            <div class="carousel-slide-content white-text">
+                <h2>暑期旅游度假</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- 秒杀区域模块 -->
+    <div class="page-container flash-sale">
+        <div class="flash-sale-header">
+            <h2 class="section-title">限时秒杀</h2>
+            <div class="flash-sale-timer">
+                距离结束还有：<span id="main-flash-sale-timer"><span class="days">0</span>天 <span class="hours">00</span>:<span
+                        class="minutes">00</span>:<span class="seconds">00</span></span>
+            </div>
+        </div>
+        <div class="flash-sale-grid">
+            <div class="flash-product"><img
+                    src="https://ts1.tc.mm.bing.net/th/id/OIP-C.jKrJZ2QH2GL6ydwFID0QngHaHC?rs=1&pid=ImgDetMain"
+                    alt="[摇滚专辑唱片]">
+                <h3 class="product-title">摇滚专辑唱片</h3>
+                <div class="flash-product-price">¥89</div>
+                <div class="countdown-timer" data-end-time="2026-06-13T23:59:59"></div><button
+                    class="add-to-cart">添加到购物车</button>
+            </div>
+            <div class="flash-product"><img
+                    src="https://ts4.tc.mm.bing.net/th/id/OIP-C.vzrKg5nHdZUeYbi-9xEqSQHaHS?rs=1&pid=ImgDetMain"
+                    alt="[折叠屏手机]">
+                <h3 class="product-title">折叠屏手机</h3>
+                <div class="flash-product-price">¥1299</div>
+                <div class="countdown-timer" data-end-time="2026-06-14T12:00:00"></div><button
+                    class="add-to-cart">添加到购物车</button>
+            </div>
+            <div class="flash-product"><img
+                    src="https://n.sinaimg.cn/sinakd10113/135/w640h295/20210119/4fc7-khxeamv4840099.jpg" alt="[时尚外套]">
+                <h3 class="product-title">时尚外套</h3>
+                <div class="flash-product-price">¥199</div>
+                <div class="countdown-timer" data-end-time="2026-06-14T18:30:00"></div><button
+                    class="add-to-cart">添加到购物车</button>
+            </div>
+            <div class="flash-product"><img
+                    src="https://static.nike.com.cn/a/images/c_limit,w_592,f_auto/t_product_v1/a92219ed-b339-46d0-958c-531b76fced10/air-jordan-1-retro-high-og-ruby-%E5%A4%8D%E5%88%BB%E5%A5%B3%E5%AD%90%E8%BF%90%E5%8A%A8%E9%9E%8B-dTp2Gj.png"
+                    alt="[运动鞋]">
+                <h3 class="product-title">运动鞋</h3>
+                <div class="flash-product-price">¥299</div>
+                <div class="countdown-timer" data-end-time="2026-06-15T00:00:00"></div><button
+                    class="add-to-cart">添加到购物车</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 商品区模块 -->
+    <div class="page-container">
+        <h2 class="section-title">热门商品</h2>
+        <div class="product-grid">
+            <div class="product-card">
+                <div class="product-image-container"><img
+                        src="https://img12.360buyimg.com/n1/s720x720_jfs/t1/224404/39/23926/175838/674184d3F7da38a16/aacd1d893be980dc.jpg.avif"
+                        alt="[书籍《一直游到海水变蓝》封面]" class="product-thumbnail">
+                    <div class="zoom-magnifier"></div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">精美书籍</h3>
+                    <p class="product-description">著名作家新作《一直游到海水变蓝》</p>
+                    <div class="product-price">¥199.00</div><button class="add-to-cart">添加到购物车</button>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image-container"><img
+                        src="https://zhanstatic.vivo.com.cn/wukong-zhan/img/da554f87-a21f-475d-aec7-bb834392336b.jpg.webp"
+                        alt="[Vivo折叠手机图片]" class="product-thumbnail">
+                    <div class="zoom-magnifier"></div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">折叠手机</h3>
+                    <p class="product-description">最新款折叠手机，高性能处理器，超轻薄。</p>
+                    <div class="product-price">¥1299.00</div><button class="add-to-cart">添加到购物车</button>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image-container"><img
+                        src="https://ts1.tc.mm.bing.net/th/id/R-C.6c1d1a7f98d90ea8634db7492963f258?rik=%2f%2bvFJ%2b9U1dLAfw&riu=http%3a%2f%2fp1.itc.cn%2fimages01%2f20200617%2f02b97584cd3948d29e652d943d0af98f.png&ehk=vfIqChARDqrvXVvTNJlyni5gNDE56vKTMWNKiOd4RVU%3d&risl=&pid=ImgRaw&r=0"
+                        alt="[复古马甲]"class="product-thumbnail">
+                    <div class="zoom-magnifier"></div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">复古马甲</h3>
+                    <p class="product-description">中古店进货，保暖舒适，多种颜色可选。</p>
+                    <div class="product-price">¥199</div><button class="add-to-cart">添加到购物车</button>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image-container"><img
+                        src="https://pic3.zhimg.com/v2-8402989cffa7372e5a62ebb6f51e132c_r.jpg" alt="[篮球鞋]"class="product-thumbnail">
+                    <div class="zoom-magnifier"></div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">篮球鞋</h3>
+                    <p class="product-description">专业篮球鞋，减震透气，高弹性发泡缓震中底。</p>
+                    <div class="product-price">¥299</div><button class="add-to-cart">添加到购物车</button>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image-container"><img
+                        src="https://dlcdnwebimgs.asus.com.cn/files/media/094E8B73-A834-4DBC-90F3-0237D85BD1A3/G16-Air_01.jpg"
+                        alt="[笔记本电脑]"class="product-thumbnail">
+                    <div class="zoom-magnifier"></div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">笔记本电脑</h3>
+                    <p class="product-description">高性能全能本，适合办公和3A游戏。</p>
+                    <div class="product-price">¥4999</div><button class="add-to-cart">添加到购物车</button>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image-container"><img
+                        src="https://ts2.tc.mm.bing.net/th/id/OIP-C.eS91yCDUC_oM76s1UbH0FgHaFj?rs=1&pid=ImgDetMain"
+                        alt="[运动跑鞋]"class="product-thumbnail">
+                    <div class="zoom-magnifier"></div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">运动跑鞋</h3>
+                    <p class="product-description">专业跑步鞋，减震透气，多种尺码可选。</p>
+                    <div class="product-price">¥599</div><button class="add-to-cart">添加到购物车</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主题选择器模块 -->
+    <div class="theme-selector">
+        <div class="theme-preview theme-cyberpunk" data-theme="theme-cyberpunk"><img
+                src="https://www.gamewallpapers.com/img_script/wallpaper_dir/img.php?src=wallpaper_cyberpunk_2077_phantom_liberty_01_2560x1440.jpg&height=450&width=800&fill-to-fit&sharpen"
+                alt="[赛博朋克主题缩略图]"></div>
+        <div class="theme-preview theme-cod" data-theme="theme-cod"><img
+                src="https://www.gamewallpapers.com/img_script/wallpaper_dir/img.php?src=wallpaper_call_of_duty_modern_warfare_01_2560x1440.jpg&height=450&width=800&fill-to-fit&sharpen"
+                alt="[COD主题缩略图]"></div>
+        <div class="theme-preview theme-horizon" data-theme="theme-horizon"><img
+                src="https://www.gamewallpapers.com/img_script/mobile_dir2/img.php?src=wallpaper_forza_horizon_4_02_1440x2560.jpg&width=253&height=450&crop-to-fit&sharpen"
+                alt="[极限竞速：地平线主题缩略图]"></div>
+        <div class="theme-preview theme-gta" data-theme="theme-gta"><img
+                src="https://www.gamewallpapers.com/img_script/mobile_dir/img.php?src=wallpaper_grand_theft_auto_5_04.jpg&width=253&height=450&crop-to-fit&sharpen"
+                alt="[GTA V主题缩略图]"></div>
+        <div class="theme-preview theme-genshin" data-theme="theme-genshin"><img
+                src="https://www.gamewallpapers.com/img_script/mobile_dir2/img.php?src=wallpaper_genshin_impact_fan_art_01_1440x2560.jpg&width=253&height=450&crop-to-fit&sharpen"
+                alt="[原神主题缩略图]"></div>
+    </div>
+
+    <!-- 在线客服聊天按钮和窗口模块 -->
+    <div class="chat-fab" id="chat-fab-btn">💬</div>
+    <div class="chat-window" id="chat-window">
+        <div class="chat-header">
+            <span>在线客服</span>
+            <button class="chat-close-btn" id="chat-close-btn">×</button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="message agent">您好！请问有什么可以帮助您的吗？</div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="输入消息...">
+            <button id="chat-send-btn">➤</button>
+        </div>
+    </div>
+
+    <script>
+        /*
+         * JavaScript 全局 DOMContentLoaded 事件监听
+         * -----------------------------------------------------------------------------
+         * 作用: 确保所有 DOM 元素加载完成后再执行 JavaScript 代码，防止对未加载元素的操作。
+         * 实现逻辑:
+         * - `document.addEventListener('DOMContentLoaded', function () { ... });`：
+         * 这是标准的事件监听方式，确保脚本在文档结构完全加载和解析后执行，而不是等待所有图片、样式表等资源加载完成。
+         */
+        document.addEventListener('DOMContentLoaded', function () {
+            // 定义全局变量，用于存储购物车数据和轮播图当前索引
+            let cart = []; // 存储购物车中的商品，每个商品包含 name, price, quantity
+            let currentSlide = 0; // 轮播图当前显示的幻灯片索引
+
+            // 获取 DOM 元素引用
+            const cartCountElement = document.getElementById('cart-count'); // 购物车商品数量显示元素
+            const cartPanel = document.getElementById('cart-panel'); // 购物车侧边面板
+            const cartItemsContainer = document.getElementById('cart-items'); // 购物车商品列表容器
+            const cartTotalPriceElement = document.getElementById('cart-total-price'); // 购物车总价显示元素
+            const authModal = document.getElementById('auth-modal'); // 登录/注册弹窗
+            const slides = document.querySelectorAll('.carousel-slide'); // 所有轮播图幻灯片
+
+            /*
+             * 轮播图功能模块
+             * -----------------------------------------------------------------------------
+             * 作用: 实现轮播图的自动播放和幻灯片切换。
+             * 实现逻辑:
+             * - `showSlide(index)` 函数:
+             * - 移除所有幻灯片的 `active` 类，使其隐藏。
+             * - 为指定 `index` 的幻灯片添加 `active` 类，使其显示。
+             * - 更新 `currentSlide` 变量。
+             * - 定时器 (`setInterval`):
+             * - 如果页面存在幻灯片，每隔 3000 毫秒 (3秒) 调用 `showSlide` 函数切换到下一张幻灯片。
+             * - 使用 `% slides.length` 实现循环播放，当达到最后一张时回到第一张。
+             */
+            function showSlide(index) {
+                slides.forEach(slide => slide.classList.remove('active'));
+                if (slides[index]) {
+                    slides[index].classList.add('active');
+                    currentSlide = index;
+                }
+            }
+            // 初始化轮播图，如果存在幻灯片，则启动自动播放
+            if (slides.length > 0) {
+                // 立即显示第一张幻灯片 (虽然 HTML 中已经默认第一张是 active，但这里确保)
+                showSlide(currentSlide);
+                // 设置定时器，每3秒切换一次幻灯片
+                setInterval(() => showSlide((currentSlide + 1) % slides.length), 3000);
+            }
+
+            /*
+             * 购物车功能模块
+             * -----------------------------------------------------------------------------
+             * 作用: 管理购物车商品的添加、删除、清空、数量和总价的实时更新。
+             * 实现逻辑:
+             * - `updateCartDisplay()` 函数:
+             * - 清空购物车商品列表容器 `cartItemsContainer` 的内容。
+             * - 遍历 `cart` 数组，为每个商品创建 DOM 元素，显示商品名称、数量、价格和移除按钮。
+             * - 计算购物车中商品的总价和总数量，并更新到页面上。
+             * - 根据购物车数量显示或隐藏 `cart-count` 元素。
+             * - `addToCart(productCard)` 函数:
+             * - 从传入的商品卡片元素中获取商品名称和价格。
+             * - 检查商品是否已在购物车中：
+             * - 如果存在，增加其数量。
+             * - 如果不存在，作为新商品添加到 `cart` 数组。
+             * - 调用 `updateCartDisplay()` 更新购物车界面。
+             * - 事件监听器:
+             * - 点击 "添加到购物车" 按钮 (`.add-to-cart`) 触发 `addToCart`。
+             * - 点击购物车图标 (`#cart-toggle`) 切换购物车面板的显示/隐藏。
+             * - 点击购物车面板关闭按钮 (`.cart-panel-close`) 关闭面板。
+             * - 点击 "清空购物车" 按钮 (`#cart-clear`) 清空 `cart` 数组并更新显示。
+             * - 点击购物车商品中的 "×" 移除按钮 (`.cart-item-remove`) 从 `cart` 数组中删除对应商品。
+             */
+            function updateCartDisplay() {
+                cartItemsContainer.innerHTML = ''; // 清空购物车面板中的当前商品列表
+                let total = 0; // 购物车商品总价
+                let count = 0; // 购物车商品总数量
+                // 遍历购物车数组，为每个商品创建对应的 DOM 元素
+                cart.forEach((item, index) => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'cart-item';
+                    itemElement.innerHTML = `
+                        <span>${item.name} (x${item.quantity})</span>
+                        <span>¥${(item.price * item.quantity).toFixed(2)}</span>
+                        <span class="cart-item-remove" data-index="${index}">×</span>`; // 添加移除按钮，并存储商品在数组中的索引
+                    cartItemsContainer.appendChild(itemElement); // 将商品元素添加到购物车列表
+                    total += item.price * item.quantity; // 累加总价
+                    count += item.quantity; // 累加总数量
+                });
+                cartTotalPriceElement.textContent = `¥${total.toFixed(2)}`; // 更新总价显示
+                cartCountElement.textContent = count; // 更新购物车数量气泡
+                cartCountElement.style.display = count > 0 ? 'inline-block' : 'none'; // 如果数量大于0则显示气泡，否则隐藏
+            }
+
+            function addToCart(productCard) {
+                const productName = productCard.querySelector('.product-title').textContent; // 获取商品名称
+                // 获取商品价格，兼容秒杀区和普通商品区的价格元素
+                const productPriceText = productCard.querySelector('.product-price, .flash-product-price').textContent;
+                const productPrice = parseFloat(productPriceText.replace('¥', '')); // 提取价格数字
+                // 检查商品是否已在购物车中
+                const existingProduct = cart.find(item => item.name === productName);
+                if (existingProduct) {
+                    existingProduct.quantity++; // 如果已存在，数量加1
+                } else {
+                    cart.push({ name: productName, price: productPrice, quantity: 1 }); // 如果不存在，添加新商品
+                }
+                updateCartDisplay(); // 更新购物车界面
+            }
+
+            // 使用事件委托处理所有 "添加到购物车" 按钮的点击事件
+            document.body.addEventListener('click', function (e) {
+                if (e.target.classList.contains('add-to-cart')) {
+                    // 找到最近的商品卡片（无论是普通商品卡片还是秒杀商品卡片）
+                    const productCard = e.target.closest('.product-card, .flash-product');
+                    if (productCard) {
+                        addToCart(productCard); // 调用添加到购物车函数
+                    }
+                }
+            });
+
+            // 购物车面板开关事件
+            document.getElementById('cart-toggle').addEventListener('click', (e) => {
+                e.preventDefault(); // 阻止默认的链接跳转行为
+                cartPanel.classList.toggle('active'); // 切换购物车面板的 active 类，实现显示/隐藏
+            });
+            // 购物车面板关闭按钮事件
+            document.querySelector('.cart-panel-close').addEventListener('click', () => {
+                cartPanel.classList.remove('active'); // 移除 active 类，关闭购物车面板
+            });
+            // 清空购物车按钮事件
+            document.getElementById('cart-clear').addEventListener('click', () => {
+                cart = []; // 清空购物车数组
+                updateCartDisplay(); // 更新购物车界面
+            });
+            // 购物车内商品移除事件 (使用事件委托)
+            cartItemsContainer.addEventListener('click', function (e) {
+                if (e.target.classList.contains('cart-item-remove')) {
+                    // 根据 data-index 属性获取要移除商品的索引，并从购物车数组中删除
+                    cart.splice(parseInt(e.target.dataset.index, 10), 1);
+                    updateCartDisplay(); // 更新购物车界面
+                }
+            });
+
+            /*
+             * 登录/注册弹窗模块
+             * -----------------------------------------------------------------------------
+             * 作用: 控制登录和注册弹窗的显示与隐藏，以及标签页切换。
+             * 实现逻辑:
+             * - 点击 "登录/注册" 链接 (`#login-link`) 显示弹窗。
+             * - 点击弹窗背景（即 `authModal` 自身）关闭弹窗。
+             * - 点击登录/注册标签页 (`.auth-tab`) 切换表单显示：
+             * - 移除所有标签页和表单的 `active` 类。
+             * - 为被点击的标签页和对应的表单添加 `active` 类。
+             * - 提交表单时，阻止默认行为，并模拟一个成功的提示 (`alert`)，然后关闭弹窗。
+             */
+            // 点击登录/注册链接显示弹窗
+            document.getElementById('login-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                authModal.classList.add('active'); // 添加 active 类显示弹窗
+            });
+            // 点击弹窗背景关闭弹窗
+            authModal.addEventListener('click', (e) => {
+                if (e.target === authModal) { // 只有点击到弹窗自身背景时才关闭
+                    authModal.classList.remove('active');
+                }
+            });
+            // 登录/注册标签页切换
+            document.querySelectorAll('.auth-tab').forEach(tab => {
+                tab.addEventListener('click', function () {
+                    const tabName = this.dataset.tab; // 获取 data-tab 属性值 (login 或 register)
+                    // 移除所有标签页的 active 类
+                    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active'); // 为当前点击的标签页添加 active 类
+                    // 移除所有表单的 active 类
+                    document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+                    // 为对应 tabName 的表单添加 active 类，使其显示
+                    document.getElementById(`${tabName}-form`).classList.add('active');
+                });
+            });
+            // 登录和注册表单提交事件
+            document.querySelectorAll('.auth-form').forEach(form => {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault(); // 阻止表单默认提交行为 (页面刷新)
+                    // 模拟登录/注册成功提示
+                    alert(`${form.id.includes('login') ? '登录' : '注册'}成功！`);
+                    authModal.classList.remove('active'); // 关闭弹窗
+                });
+            });
+
+            /*
+             * 主题切换功能模块
+             * -----------------------------------------------------------------------------
+             * 作用: 允许用户通过点击不同的预览按钮来切换网站的主题。
+             * 实现逻辑:
+             * - `switchTheme(themeClass)` 函数:
+             * - 将 `body` 的 `className` 设置为传入的主题类名，从而应用新的主题样式。
+             * - 使用 `localStorage` 存储当前选中的主题，以便用户下次访问时保持主题设置。
+             * - 更新主题预览按钮的 `active` 状态，高亮当前选中的主题。
+             * - 事件监听器:
+             * - 为每个主题预览按钮 (`.theme-preview`) 添加点击事件，调用 `switchTheme`。
+             * - 初始化:
+             * - 在页面加载时，从 `localStorage` 获取上次保存的主题，如果没有则默认使用 `theme-cyberpunk`。
+             */
+            function switchTheme(themeClass) {
+                document.body.className = themeClass; // 将 body 的类名设置为新的主题类
+                localStorage.setItem('selectedTheme', themeClass); // 将当前主题保存到 localStorage
+                // 移除所有主题预览按钮的 active 类
+                document.querySelectorAll('.theme-preview').forEach(p => p.classList.remove('active'));
+                // 为当前激活的主题预览按钮添加 active 类
+                const activePreview = document.querySelector(`.theme-preview[data-theme='${themeClass}']`);
+                if (activePreview) activePreview.classList.add('active');
+            }
+            // 为每个主题预览按钮添加点击事件监听器
+            document.querySelectorAll('.theme-preview').forEach(preview => {
+                preview.addEventListener('click', function () {
+                    switchTheme(this.dataset.theme); // 调用主题切换函数，传入按钮的 data-theme 属性值
+                });
+            });
+            // 页面加载时，根据 localStorage 恢复上次选择的主题，如果未设置则默认为 'theme-cyberpunk'
+            switchTheme(localStorage.getItem('selectedTheme') || 'theme-cyberpunk');
+
+            /*
+             * 商品图片放大镜模块
+             * -----------------------------------------------------------------------------
+             * 作用: 当鼠标悬停在商品图片上时，显示一个局部放大镜效果。
+             * 实现逻辑:
+             * - 遍历所有 `.product-image-container` 元素。
+             * - 监听 `mousemove` 事件:
+             * - 获取鼠标相对于图片容器的位置。
+             * - 计算放大镜 (`magnifier`) 的位置，使其跟随鼠标。
+             * - 设置放大镜的 `background-image` 为原图，`background-size` 为原图的 `zoomFactor` 倍，`background-position` 根据鼠标位置进行偏移，实现放大效果。
+             * - 监听 `mouseenter` 和 `mouseleave` 事件:
+             * - 鼠标进入时，设置放大镜 `opacity` 为 1，使其显示。
+             * - 鼠标离开时，设置放大镜 `opacity` 为 0，使其隐藏。
+             */
+            document.querySelectorAll('.product-image-container').forEach(container => {
+                const image = container.querySelector('.product-thumbnail'); // 获取商品缩略图
+                const magnifier = container.querySelector('.zoom-magnifier'); // 获取放大镜元素
+
+                container.addEventListener('mousemove', (e) => {
+                    if (!magnifier || !image) return; // 如果放大镜或图片不存在，则不执行
+                    const rect = container.getBoundingClientRect(); // 获取容器相对于视口的位置和大小
+                    const x = e.clientX - rect.left; // 鼠标在容器内的X坐标
+                    const y = e.clientY - rect.top; // 鼠标在容器内的Y坐标
+
+                    magnifier.style.left = `${x - 50}px`; // 设置放大镜的X位置 (减去半径使其居中于鼠标)
+                    magnifier.style.top = `${y - 50}px`; // 设置放大镜的Y位置 (减去半径使其居中于鼠标)
+
+                    const zoomFactor = 2; // 放大倍数
+                    magnifier.style.backgroundImage = `url(${image.src})`; // 将放大镜背景设置为原图
+                    // 计算背景图的大小，使其是原图的 zoomFactor 倍
+                    magnifier.style.backgroundSize = `${rect.width * zoomFactor}px ${rect.height * zoomFactor}px`;
+                    // 计算背景图的位置，使其在放大镜中显示鼠标所在位置的放大内容
+                    magnifier.style.backgroundPosition = `-${x * zoomFactor - 50}px -${y * zoomFactor - 50}px`;
+                });
+
+                container.addEventListener('mouseenter', () => {
+                    if (magnifier) magnifier.style.opacity = '1'; // 鼠标进入时显示放大镜
+                });
+
+                container.addEventListener('mouseleave', () => {
+                    if (magnifier) magnifier.style.opacity = '0'; // 鼠标离开时隐藏放大镜
+                });
+            });
+
+            /*
+             * 倒计时功能模块
+             * -----------------------------------------------------------------------------
+             * 作用: 更新主秒杀区域和各个秒杀商品的倒计时时间。
+             * 实现逻辑:
+             * - `updateAllCountdowns()` 函数:
+             * - 获取当前时间 `now`。
+             * - **主秒杀区倒计时 (`#main-flash-sale-timer`):**
+             * - 设置一个固定的结束时间 (`2025-06-15T23:59:59`)。
+             * - 计算剩余毫秒数。
+             * - 将剩余毫秒数转换为天、小时、分钟、秒，并格式化输出。
+             * - 如果时间结束，显示 "活动已结束"。
+             * - **单个秒杀商品倒计时 (`.countdown-timer`):**
+             * - 遍历所有带有 `countdown-timer` 类的元素。
+             * - 从每个元素的 `data-end-time` 属性中获取其独立的结束时间。
+             * - 计算剩余毫秒数，并转换为小时、分钟、秒，格式化输出。
+             * - 如果时间结束，显示 "已结束"。
+             * - 定时器 (`setInterval`):
+             * - 每秒调用 `updateAllCountdowns()` 更新所有倒计时，实现实时效果。
+             */
+            function updateAllCountdowns() {
+                const now = new Date().getTime(); // 获取当前时间的时间戳 (毫秒)
+
+                // 更新主秒杀区域的倒计时
+                const mainTimerEl = document.getElementById('main-flash-sale-timer');
+                if (mainTimerEl) {
+                    const mainSaleEndTime = new Date('2026-06-15T23:59:59').getTime(); // 主秒杀活动结束时间
+                    const remaining = mainSaleEndTime - now; // 计算剩余时间 (毫秒)
+
+                    if (remaining > 0) {
+                        // 计算天、小时、分钟、秒
+                        const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+                        // 更新主倒计时显示
+                        mainTimerEl.querySelector('.days').textContent = days;
+                        mainTimerEl.querySelector('.hours').textContent = hours.toString().padStart(2, '0');
+                        mainTimerEl.querySelector('.minutes').textContent = minutes.toString().padStart(2, '0');
+                        mainTimerEl.querySelector('.seconds').textContent = seconds.toString().padStart(2, '0');
+                    } else {
+                        mainTimerEl.textContent = '活动已结束'; // 活动结束时显示
+                    }
+                }
+
+                // 更新单个秒杀商品的倒计时
+                document.querySelectorAll('.flash-product .countdown-timer').forEach(timer => {
+                    const endTime = new Date(timer.dataset.endTime).getTime(); // 获取每个商品的结束时间 (来自 data-end-time 属性)
+                    const remaining = endTime - now; // 计算剩余时间 (毫秒)
+
+                    if (remaining > 0) {
+                        // 计算小时、分钟、秒
+                        const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+                        // 更新单个商品的倒计时显示
+                        timer.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    } else {
+                        timer.textContent = '已结束'; // 商品秒杀结束时显示
+                    }
+                });
+            }
+            // 首次调用以立即显示倒计时
+            updateAllCountdowns();
+            // 每秒更新一次所有倒计时
+            setInterval(updateAllCountdowns, 1000);
+
+            /*
+             * 在线客服聊天功能模块
+             * -----------------------------------------------------------------------------
+             * 作用: 实现在线客服聊天窗口的显示/隐藏，以及用户发送消息和模拟客服回复。
+             * 实现逻辑:
+             * - 获取聊天相关的所有 DOM 元素。
+             * - 点击浮动聊天按钮 (`#chat-fab-btn`) 切换聊天窗口的 `open` 类，实现显示/隐藏。
+             * - 点击聊天窗口的关闭按钮 (`#chat-close-btn`) 关闭窗口。
+             * - `sendMessage()` 函数:
+             * - 获取输入框中的消息文本，如果为空则不发送。
+             * - 创建一个 `div` 元素，添加 `message` 和 `user` 类，显示用户消息。
+             * - 清空输入框，并将聊天区域滚动到底部。
+             * - 使用 `setTimeout` 模拟客服回复：1 秒后创建一个 `div` 元素，添加 `message` 和 `agent` 类，显示客服消息，并再次滚动到底部。
+             * - 监听发送按钮 (`#chat-send-btn`) 的点击事件和输入框 (`#chat-input`) 的 `keypress` 事件 (回车键)，触发 `sendMessage()`。
+             */
+            const chatFabBtn = document.getElementById('chat-fab-btn'); // 浮动聊天按钮
+            const chatWindow = document.getElementById('chat-window'); // 聊天窗口
+            const chatCloseBtn = document.getElementById('chat-close-btn'); // 聊天窗口关闭按钮
+            const chatMessages = document.getElementById('chat-messages'); // 消息显示区域
+            const chatInput = document.getElementById('chat-input'); // 消息输入框
+            const chatSendBtn = document.getElementById('chat-send-btn'); // 发送按钮
+
+            // 点击浮动聊天按钮切换聊天窗口的显示状态
+            chatFabBtn.addEventListener('click', () => {
+                chatWindow.classList.toggle('open'); // 切换 'open' 类
+            });
+
+            // 点击聊天窗口的关闭按钮关闭窗口
+            chatCloseBtn.addEventListener('click', () => {
+                chatWindow.classList.remove('open'); // 移除 'open' 类
+            });
+
+            function sendMessage() {
+                const messageText = chatInput.value.trim(); // 获取输入框中的文本并去除首尾空格
+                if (messageText === '') return; // 如果消息为空，则不发送
+
+                // 显示用户消息
+                const userMessage = document.createElement('div');
+                userMessage.classList.add('message', 'user'); // 添加 'message' 和 'user' 类
+                userMessage.textContent = messageText; // 设置消息内容
+                chatMessages.appendChild(userMessage); // 将用户消息添加到消息区域
+
+                chatInput.value = ''; // 清空输入框
+                chatMessages.scrollTop = chatMessages.scrollHeight; // 滚动消息区域到底部，显示最新消息
+
+                // 模拟客服回复 (1秒后)
+                setTimeout(() => {
+                    const agentMessage = document.createElement('div');
+                    agentMessage.classList.add('message', 'agent'); // 添加 'message' 和 'agent' 类
+                    agentMessage.textContent = '感谢您的提问，我们的客服代表正在赶来的路上，请稍候。'; // 客服回复内容
+                    chatMessages.appendChild(agentMessage); // 将客服消息添加到消息区域
+                    chatMessages.scrollTop = chatMessages.scrollHeight; // 再次滚动到底部，显示客服回复
+                }, 1000); // 延迟 1000 毫秒 (1秒)
+            }
+
+            // 监听发送按钮的点击事件
+            chatSendBtn.addEventListener('click', sendMessage);
+            // 监听输入框的键盘按键事件
+            chatInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') { // 如果按下了回车键
+                    sendMessage(); // 调用发送消息函数
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
