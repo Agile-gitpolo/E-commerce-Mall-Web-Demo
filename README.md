@@ -27,7 +27,7 @@ This is a front-end web demo inspired by JD.com (Jingdong Mall), developed as pa
 
 ## 📌 Future Improvements
 
-- Add backend with user login/session management
+- Add backend with user login/session manage
 - Store cart data persistently
 - Product filtering and sorting
 - Full mobile support and performance optimization
