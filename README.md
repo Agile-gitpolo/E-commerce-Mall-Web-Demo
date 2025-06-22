@@ -1,6 +1,6 @@
 # E-commerce Mall Web Project
 
-This is a front-end web demo inspired by JD.com (Jingdong Mall), developed as part of a training project. The site simulates a modern e-commerce platform with essential features including:
+This is a front-end web demo inspired by JD.com (Jingdong Mall), developed as part of a training project. The site simulates a modern e-commerce platform with essential features including:=
 
 ## 🔧 Features
 
